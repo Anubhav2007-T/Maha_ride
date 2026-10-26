@@ -115,7 +115,7 @@ footer{background:var(--teal);color:#e8f0f2;padding:34px 0;margin-top:30px}foote
 <div><label for="b1">Pickup date</label><input type="date" id="b1" required></div><div><label for="b2">Return date</label><input type="date" id="b2" required></div>
 <div><label for="bt">Number of travellers</label><input type="number" id="bt" min="1" max="20" value="2"></div>
 <div class="f"><label for="br">Special requirements</label><textarea id="br"></textarea></div>
-<div class="f" id="be2"></div><div class="f"><button class="btn">Send booking request</button></div></form><div id="bc"></div></div></section></div>
+<div class="f"><small style="color:var(--mut)">Your details are shared with the MahaRide team only to process this college-demo request.</small></div><div class="f" id="be2"></div><div class="f"><button class="btn">Send booking request</button></div></form><div id="bc"></div></div></section></div>
 
 <div class="pg" id="p-about" hidden><section class="s"><div class="w" style="max-width:760px"><h2>About MahaRide</h2>
 <p>MahaRide connects travellers with rental vehicles and promotes tourism across Maharashtra. Our tagline says it: <b>Ride Maharashtra. Discover More.</b></p>
@@ -228,7 +228,8 @@ if(!g("b1")||!g("b2"))er.push("Choose pickup and return dates.");else if(g("b1")
 if(!v[7])er.push("That vehicle is booked. Choose another.");
 $("#be2").innerHTML=er.length?`<div class="msg" role="alert">${er.join("<br>")}</div>`:"";if(er.length)return;
 const days=Math.round((new Date(g("b2"))-new Date(g("b1")))/864e5)+1,id="MR-"+Math.random().toString(36).slice(2,7).toUpperCase(),total=days*v[5];
-BK().unshift({id,name:g("bn"),veh:v[0],dest:$("#bd").value,d1:g("b1"),d2:g("b2"),n:+g("bt")||1,total,st:"Pending"});save();
+const rec={id,name:g("bn"),veh:v[0],dest:$("#bd").value,d1:g("b1"),d2:g("b2"),n:+g("bt")||1,total,st:"Pending"};BK().unshift(rec);save();
+try{fetch(SHEET_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({...rec,mobile:g("bm"),email:g("be"),pickup:g("bp"),req:g("br")})}).catch(()=>{})}catch(x){}
 $("#bc").innerHTML=`<div class="msg good" role="status"><h3>Request received</h3>Booking ID: <b>${id}</b><br>${v[0]} to ${$("#bd").value}, ${g("b1")} to ${g("b2")} (${days} day${days>1?"s":""})<br>Estimated price: <b>${R(total)}</b> (demo only, no payment taken)</div>`;$("#bf").reset();$("#bt").value=2;$("#bc").scrollIntoView({behavior:"smooth"})};
 $("#cf").onsubmit=e=>{e.preventDefault();$("#cr").innerHTML=`<div class="msg good" role="status">Thanks! Your message is saved on this device (demo only).</div>`;$("#cf").reset()};
 // operator
@@ -240,6 +241,7 @@ $("#ob").innerHTML=`<table><tr><th>ID</th><th>Name</th><th>Vehicle</th><th>Desti
 $("#rs").onclick=()=>{if(confirm("Reset all bookings to the sample data?")){mem=null;try{localStorage.removeItem("mr_bk")}catch(e){}BK();drawO()}};
 $("#ob").onchange=e=>{if(e.target.dataset.s!=null){BK()[e.target.dataset.s].st=e.target.value;save();drawO()}};
 // router
+const SHEET_URL="https://script.google.com/macros/s/AKfycbxw_zx-cW-57KGzCy8RlGy2v7pmDAxUkfoO3rzVg6J20mRPz81M8RQERk1Q_o7s5cI6/exec";
 const PG=["home","explore","destinations","vehicles","booking","about","contact","operator"];
 const route=(x)=>{let h=typeof x==="string"?x:location.hash.slice(1);if(!PG.includes(h))h="home";$$(".pg").forEach(s=>s.hidden=s.id!=="p-"+h);$$("nav a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+h));
 if(h==="operator")drawO();if(h==="destinations")drawD();if(h==="vehicles")drawV();$("#nv").classList.remove("open");scrollTo(0,0)};
